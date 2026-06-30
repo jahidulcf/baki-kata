@@ -78,9 +78,9 @@ class Database {
         this.transactions
             .filter(t => t.customerId === customerId)
             .forEach(t => {
-                if (t.type === 'credit') {
+                if (t.type === 'due') {
                     balance += t.amount;
-                } else if (t.type === 'payment') {
+                } else if (t.type === 'collection') {
                     balance -= t.amount;
                 }
             });
@@ -156,7 +156,7 @@ class Database {
         const now = new Date();
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
         return this.transactions
-            .filter(t => t.type === 'payment' && t.date >= monthStart)
+            .filter(t => t.type === 'collection' && t.date >= monthStart)
             .reduce((sum, t) => sum + t.amount, 0);
     }
 
@@ -178,7 +178,6 @@ class App {
     constructor() {
         this.db = new Database();
         this.currentCustomerId = null;
-        this.currentEditingTransactionId = null;
         this.init();
     }
 
@@ -203,8 +202,9 @@ class App {
         document.getElementById('add-customer-btn-list').addEventListener('click', () => this.showAddCustomerModal());
         document.getElementById('customer-search').addEventListener('input', (e) => this.filterCustomers(e.target.value));
 
-        // Customer Details
-        document.getElementById('add-transaction-btn').addEventListener('click', () => this.showAddTransactionModal());
+        // Customer Details - New split transaction buttons
+        document.getElementById('add-due-btn').addEventListener('click', () => this.showAddDueModal());
+        document.getElementById('add-collection-btn').addEventListener('click', () => this.showAddCollectionModal());
         document.getElementById('share-pdf-btn').addEventListener('click', () => this.generatePDF());
         document.getElementById('customer-menu-btn').addEventListener('click', () => this.showCustomerMenu());
 
@@ -216,8 +216,11 @@ class App {
         // Add Customer Modal
         document.getElementById('save-new-customer').addEventListener('click', () => this.saveNewCustomer());
 
-        // Add Transaction Modal
-        document.getElementById('save-transaction').addEventListener('click', () => this.saveTransaction());
+        // Add Due Modal
+        document.getElementById('save-due').addEventListener('click', () => this.saveDue());
+
+        // Add Collection Modal
+        document.getElementById('save-collection').addEventListener('click', () => this.saveCollection());
 
         // Customer Menu Modal
         document.getElementById('edit-customer-btn').addEventListener('click', () => this.showEditCustomerModal());
@@ -229,20 +232,15 @@ class App {
 
         // Settings
         document.getElementById('save-shop-info').addEventListener('click', () => this.saveShopInfo());
-        document.getElementById('export-data-btn').addEventListener('click', () => this.exportData());
-        document.getElementById('import-data-btn').addEventListener('click', () => {
-            document.getElementById('import-file').click();
-        });
-        document.getElementById('import-file').addEventListener('change', (e) => this.importData(e));
-        document.getElementById('delete-all-data').addEventListener('click', () => this.deleteAllData());
 
         // Header menu
         document.getElementById('menu-btn').addEventListener('click', () => this.showMenuModal());
         document.getElementById('menu-close').addEventListener('click', () => this.closeAllModals());
 
-        // Set today's date in transaction modal
+        // Set today's date in transaction modals
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('transaction-date').value = today;
+        document.getElementById('due-date').value = today;
+        document.getElementById('collection-date').value = today;
     }
 
     // View Management
@@ -259,7 +257,7 @@ class App {
         document.getElementById('header-title').textContent = 'বাকি খাতা';
         
         // Update nav
-        document.querySelectorAll('#header ~ nav button').forEach((btn, i) => {
+        document.querySelectorAll('nav button').forEach(btn => {
             btn.classList.remove('text-blue-600', 'border-t-2', 'border-blue-600');
             btn.classList.add('text-gray-600');
         });
@@ -332,8 +330,8 @@ class App {
         } else {
             recentContainer.innerHTML = recentTrans.map(trans => {
                 const customer = this.db.getCustomer(trans.customerId);
-                const type = trans.type === 'credit' ? '+ ক্রেডিট' : '- পেমেন্ট';
-                const typeClass = trans.type === 'credit' ? 'text-red-600' : 'text-green-600';
+                const type = trans.type === 'due' ? '+ বাকি' : '- জমা';
+                const typeClass = trans.type === 'due' ? 'text-red-600' : 'text-green-600';
                 return `
                     <div class="flex justify-between items-center text-sm py-1 border-b pb-1">
                         <div>
@@ -353,7 +351,7 @@ class App {
         const listContainer = document.getElementById('customer-list');
 
         if (customers.length === 0) {
-            listContainer.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">গ্রাহক নেই</p>';
+            listContainer.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">গ্রাহক ���েই</p>';
         } else {
             listContainer.innerHTML = customers.map(customer => {
                 const balance = this.db.getCustomerBalance(customer.id);
@@ -433,8 +431,8 @@ class App {
             historyContainer.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">কোন লেনদেন নেই</p>';
         } else {
             historyContainer.innerHTML = transactions.map(trans => {
-                const type = trans.type === 'credit' ? 'ক্রেডিট' : 'পেমেন্ট';
-                const typeClass = trans.type === 'credit' ? 'text-red-600' : 'text-green-600';
+                const type = trans.type === 'due' ? 'বাকি' : 'জমা';
+                const typeClass = trans.type === 'due' ? 'text-red-600' : 'text-green-600';
                 return `
                     <div class="grid grid-cols-3 gap-2 text-xs py-1 border-b pb-1 hover:bg-gray-50 px-1 rounded">
                         <div>${this.formatDate(trans.date)}</div>
@@ -479,29 +477,53 @@ class App {
         this.updateDashboard();
     }
 
-    showAddTransactionModal() {
+    showAddDueModal() {
         this.closeAllModals();
-        this.currentEditingTransactionId = null;
-        document.getElementById('transaction-type').value = '';
-        document.getElementById('transaction-amount').value = '';
-        document.getElementById('transaction-note').value = '';
+        document.getElementById('due-amount').value = '';
+        document.getElementById('due-note').value = '';
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('transaction-date').value = today;
-        document.getElementById('add-transaction-modal').classList.remove('hidden');
+        document.getElementById('due-date').value = today;
+        document.getElementById('add-due-modal').classList.remove('hidden');
+        document.getElementById('due-amount').focus();
     }
 
-    saveTransaction() {
-        const type = document.getElementById('transaction-type').value;
-        const amount = document.getElementById('transaction-amount').value;
-        const note = document.getElementById('transaction-note').value.trim();
-        const date = document.getElementById('transaction-date').value;
+    saveDue() {
+        const amount = document.getElementById('due-amount').value;
+        const note = document.getElementById('due-note').value.trim();
+        const date = document.getElementById('due-date').value;
 
-        if (!type || !amount || amount <= 0) {
-            alert('দয়া করে সব প্রয়োজনীয় তথ্য পূরণ করুন');
+        if (!amount || amount <= 0) {
+            alert('দয়া করে সঠিক পরিমাণ প্রবেশ করুন');
             return;
         }
 
-        this.db.addTransaction(this.currentCustomerId, type, amount, note, date);
+        this.db.addTransaction(this.currentCustomerId, 'due', amount, note, date);
+        this.closeAllModals();
+        this.updateCustomerDetails(this.currentCustomerId);
+        this.updateDashboard();
+    }
+
+    showAddCollectionModal() {
+        this.closeAllModals();
+        document.getElementById('collection-amount').value = '';
+        document.getElementById('collection-note').value = '';
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('collection-date').value = today;
+        document.getElementById('add-collection-modal').classList.remove('hidden');
+        document.getElementById('collection-amount').focus();
+    }
+
+    saveCollection() {
+        const amount = document.getElementById('collection-amount').value;
+        const note = document.getElementById('collection-note').value.trim();
+        const date = document.getElementById('collection-date').value;
+
+        if (!amount || amount <= 0) {
+            alert('দয়া করে সঠিক পরিমাণ প্রবেশ করুন');
+            return;
+        }
+
+        this.db.addTransaction(this.currentCustomerId, 'collection', amount, note, date);
         this.closeAllModals();
         this.updateCustomerDetails(this.currentCustomerId);
         this.updateDashboard();
@@ -590,62 +612,6 @@ class App {
         alert('দোকানের তথ্য সংরক্ষিত হয়েছে');
     }
 
-    exportData() {
-        const data = {
-            customers: this.db.customers,
-            transactions: this.db.transactions,
-            shop: this.db.shop,
-            exportedAt: new Date().toISOString()
-        };
-
-        const json = JSON.stringify(data, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `baki_khata_backup_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (data.customers && data.transactions && data.shop) {
-                    this.db.customers = data.customers;
-                    this.db.transactions = data.transactions;
-                    this.db.shop = data.shop;
-                    this.db.saveData();
-                    alert('ডাটা সফলভাবে ইম্পোর্ট করা হয়েছে');
-                    this.updateDashboard();
-                    this.updateShopInfo();
-                } else {
-                    alert('অবৈধ ডাটা ফরম্যাট');
-                }
-            } catch (error) {
-                alert('ডাটা ইম্পোর্ট করতে ত্রুটি হয়েছে');
-            }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
-    }
-
-    deleteAllData() {
-        if (confirm('সব ডাটা মুছতে আপনি নিশ্চিত? এই কাজ বাতিল করা যাবে না।')) {
-            this.db.customers = [];
-            this.db.transactions = [];
-            this.db.shop = { name: '', phone: '', address: '' };
-            this.db.saveData();
-            alert('সব ডাটা মুছে ফেলা হয়েছে');
-            this.showDashboard();
-        }
-    }
-
     // PDF Generation
     generatePDF() {
         const customer = this.db.getCustomer(this.currentCustomerId);
@@ -697,7 +663,7 @@ class App {
         `;
 
         transactions.forEach(trans => {
-            const type = trans.type === 'credit' ? 'ক্রেডিট' : 'পেমেন্ট';
+            const type = trans.type === 'due' ? 'বাকি' : 'জমা';
             html += `
                 <tr>
                     <td>${this.formatDate(trans.date)}</td>
