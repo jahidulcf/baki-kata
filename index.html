@@ -122,6 +122,24 @@
                     </div>
                 </div>
 
+                <!-- Action Cards -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button id="add-due-btn" class="bg-red-50 border-2 border-red-200 rounded-lg p-4 hover:border-red-400 transition text-center">
+                        <svg class="w-6 h-6 mx-auto mb-2 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9H13V7.5h-2V11H8.5v2H11v3.5h2V13h3.5v-2z"></path>
+                        </svg>
+                        <p class="font-bold text-red-600">+ বাকি</p>
+                        <p class="text-xs text-gray-600">নতুন পাওনা</p>
+                    </button>
+                    <button id="add-collection-btn" class="bg-green-50 border-2 border-green-200 rounded-lg p-4 hover:border-green-400 transition text-center">
+                        <svg class="w-6 h-6 mx-auto mb-2 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9H13V7.5h-2V11H8.5v2H11v3.5h2V13h3.5v-2z"></path>
+                        </svg>
+                        <p class="font-bold text-green-600">+ জমা</p>
+                        <p class="text-xs text-gray-600">আদায় যোগ করুন</p>
+                    </button>
+                </div>
+
                 <!-- Transaction History -->
                 <div class="bg-white rounded-lg p-4 border border-gray-100 mb-4">
                     <h3 class="font-semibold mb-3">লেনদেনের ইতিহাস</h3>
@@ -137,15 +155,6 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <button id="add-due-btn" class="bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition">
-                        + পাওনা যোগ করুন
-                    </button>
-                    <button id="add-collection-btn" class="bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition">
-                        + আদায় যোগ করুন
-                    </button>
-                </div>
                 <button id="share-pdf-btn" class="w-full bg-gray-600 text-white py-3 rounded-lg font-medium hover:bg-gray-700 transition">
                     PDF রিপোর্ট
                 </button>
@@ -164,20 +173,6 @@
                                 সংরক্ষণ করুন
                             </button>
                         </div>
-                    </div>
-
-                    <div class="bg-white rounded-lg p-4 border border-gray-100">
-                        <h3 class="font-semibold mb-3">ডাটা</h3>
-                        <button id="export-data-btn" class="w-full bg-gray-600 text-white py-2 rounded-lg font-medium hover:bg-gray-700 transition mb-2">
-                            ডাটা এক্সপোর্ট
-                        </button>
-                        <button id="import-data-btn" class="w-full bg-gray-600 text-white py-2 rounded-lg font-medium hover:bg-gray-700 transition mb-2">
-                            ডাটা ইম্পোর্ট
-                        </button>
-                        <button id="delete-all-data" class="w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition">
-                            সব ডাটা মুছুন
-                        </button>
-                        <input type="file" id="import-file" accept=".json" style="display: none;">
                     </div>
 
                     <div class="bg-white rounded-lg p-4 border border-gray-100">
@@ -242,7 +237,7 @@
     <div id="add-due-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
         <div class="bg-white w-full rounded-t-lg p-4 max-w-md mx-auto">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold">পাওনা যোগ করুন</h2>
+                <h2 class="text-lg font-bold">বাকি যোগ করুন</h2>
                 <button class="close-modal p-1 hover:bg-gray-100 rounded">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -250,11 +245,11 @@
                 </button>
             </div>
             <div class="space-y-3">
-                <input type="number" id="due-amount" placeholder="পরিমাণ (টাকায়)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0">
-                <textarea id="due-note" placeholder="বিবরণ (ঐচ্ছিক)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="2"></textarea>
-                <input type="date" id="due-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="number" id="due-amount" placeholder="পরিমাণ (টাকায়)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" min="0">
+                <textarea id="due-note" placeholder="বিবরণ (ঐচ্ছিক)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none" rows="2"></textarea>
+                <input type="date" id="due-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 <button id="save-due" class="w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition">
-                    পাওনা সংরক্ষণ করুন
+                    বাকি সংরক্ষণ করুন
                 </button>
             </div>
         </div>
@@ -264,7 +259,7 @@
     <div id="add-collection-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
         <div class="bg-white w-full rounded-t-lg p-4 max-w-md mx-auto">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold">আদায় যোগ করুন</h2>
+                <h2 class="text-lg font-bold">জমা যোগ করুন</h2>
                 <button class="close-modal p-1 hover:bg-gray-100 rounded">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -272,11 +267,11 @@
                 </button>
             </div>
             <div class="space-y-3">
-                <input type="number" id="collection-amount" placeholder="পরিমাণ (টাকায়)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0">
-                <textarea id="collection-note" placeholder="বিবরণ (ঐচ্ছিক)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="2"></textarea>
-                <input type="date" id="collection-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="number" id="collection-amount" placeholder="পরিমাণ (টাকায়)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500" min="0">
+                <textarea id="collection-note" placeholder="বিবরণ (ঐচ্ছিক)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none" rows="2"></textarea>
+                <input type="date" id="collection-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
                 <button id="save-collection" class="w-full bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 transition">
-                    আদায় সংরক্ষণ করুন
+                    জমা সংরক্ষণ করুন
                 </button>
             </div>
         </div>
