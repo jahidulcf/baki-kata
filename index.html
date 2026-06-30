@@ -137,10 +137,15 @@
                     </div>
                 </div>
 
-                <!-- Add Transaction Button -->
-                <button id="add-transaction-btn" class="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition mb-2">
-                    + নতুন হিসাব
-                </button>
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <button id="add-due-btn" class="bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition">
+                        + পাওনা যোগ করুন
+                    </button>
+                    <button id="add-collection-btn" class="bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition">
+                        + আদায় যোগ করুন
+                    </button>
+                </div>
                 <button id="share-pdf-btn" class="w-full bg-gray-600 text-white py-3 rounded-lg font-medium hover:bg-gray-700 transition">
                     PDF রিপোর্ট
                 </button>
@@ -233,11 +238,11 @@
         </div>
     </div>
 
-    <!-- Add Transaction Modal -->
-    <div id="add-transaction-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+    <!-- Add Due Modal -->
+    <div id="add-due-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
         <div class="bg-white w-full rounded-t-lg p-4 max-w-md mx-auto">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold">নতুন লেনদেন</h2>
+                <h2 class="text-lg font-bold">পাওনা যোগ করুন</h2>
                 <button class="close-modal p-1 hover:bg-gray-100 rounded">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -245,16 +250,33 @@
                 </button>
             </div>
             <div class="space-y-3">
-                <select id="transaction-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">ধরন নির্বাচন করুন</option>
-                    <option value="credit">ক্রেডিট বিক্রয় (পাওনা যোগ করুন)</option>
-                    <option value="payment">পেমেন্ট (পাওনা কমান)</option>
-                </select>
-                <input type="number" id="transaction-amount" placeholder="পরিমাণ (টাকায়)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0">
-                <textarea id="transaction-note" placeholder="বিবরণ (ঐচ্ছিক)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="2"></textarea>
-                <input type="date" id="transaction-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="save-transaction" class="w-full bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 transition">
-                    লেনদেন সংরক্ষণ করুন
+                <input type="number" id="due-amount" placeholder="পরিমাণ (টাকায়)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0">
+                <textarea id="due-note" placeholder="বিবরণ (ঐচ্ছিক)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="2"></textarea>
+                <input type="date" id="due-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="save-due" class="w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition">
+                    পাওনা সংরক্ষণ করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Collection Modal -->
+    <div id="add-collection-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+        <div class="bg-white w-full rounded-t-lg p-4 max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold">আদায় যোগ করুন</h2>
+                <button class="close-modal p-1 hover:bg-gray-100 rounded">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <input type="number" id="collection-amount" placeholder="পরিমাণ (টাকায়)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0">
+                <textarea id="collection-note" placeholder="বিবরণ (ঐচ্ছিক)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="2"></textarea>
+                <input type="date" id="collection-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="save-collection" class="w-full bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 transition">
+                    আদায় সংরক্ষণ করুন
                 </button>
             </div>
         </div>
