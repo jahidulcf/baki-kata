@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="বাকি খাতা - ডিজিটাল ক্রেডিট লেজার">
+    <title>বাকি খাতা</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23ffffff' width='180' height='180'/><text x='50%' y='50%' font-size='80' font-weight='bold' text-anchor='middle' dy='.3em' font-family='system-ui'>খা</text></svg>">
+    
+    <style>
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #ffffff;
+        }
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+        .screen.active {
+            display: flex;
+        }
+        .mobile-container {
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            background: #ffffff;
+        }
+        .status-bar {
+            height: 44px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+        button:active {
+            opacity: 0.7;
+        }
+        .bottom-nav {
+            border-top: 1px solid #e5e7eb;
+        }
+        .icon-btn {
+            transition: none;
+        }
+        input[type="tel"], input[type="text"], input[type="date"], input[type="number"], textarea {
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <div class="mobile-container flex flex-col">
+        <!-- Status Bar -->
+        <div class="status-bar bg-white border-b border-gray-200">
+            <div class="px-4 text-center text-xs text-gray-500">বাকি খাতা</div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 overflow-y-auto">
+            
+            <!-- Dashboard Screen -->
+            <div id="dashboard-screen" class="screen active flex-col w-full">
+                <div class="flex-1 flex flex-col p-4 overflow-y-auto">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-6">বাকি খাতা</h1>
+                    
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="text-xs text-gray-600 mb-1">মোট পাওনা</div>
+                            <div class="text-xl font-bold text-gray-900" id="total-due">৳০</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="text-xs text-gray-600 mb-1">এই মাসে আদায়</div>
+                            <div class="text-xl font-bold text-gray-900" id="month-collected">৳০</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="text-xs text-gray-600 mb-1">মোট গ্রাহক</div>
+                            <div class="text-xl font-bold text-gray-900" id="total-customers">০</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="text-xs text-gray-600 mb-1">সক্রিয় হিসাব</div>
+                            <div class="text-xl font-bold text-gray-900" id="active-accounts">০</div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">সাম্প্রতিক হিসাব</h2>
+                    <div id="recent-transactions" class="space-y-2">
+                        <div class="text-sm text-gray-500 text-center py-8">কোনো লেনদেন নেই</div>
+                    </div>
+                </div>
+
+                <!-- Add Customer Button -->
+                <div class="p-4 border-t border-gray-200 bg-white">
+                    <button id="add-customer-btn" class="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold text-sm">
+                        + নতুন গ্রাহক
+                    </button>
+                </div>
+            </div>
+
+            <!-- Customer List Screen -->
+            <div id="customer-list-screen" class="screen flex-col w-full">
+                <div class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                    <div class="flex items-center gap-2 mb-3">
+                        <button id="back-to-dashboard-btn" class="icon-btn p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-xl font-bold">গ্রাহক তালিকা</h1>
+                    </div>
+                    <input id="search-input" type="text" placeholder="নাম বা ফোন খুঁজুন..." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                </div>
+
+                <div class="flex-1 overflow-y-auto">
+                    <div id="customer-list" class="divide-y divide-gray-200">
+                        <div class="p-8 text-center text-gray-500 text-sm">কোনো গ্রাহক নেই</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Details Screen -->
+            <div id="customer-details-screen" class="screen flex-col w-full">
+                <div class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                    <div class="flex items-center justify-between mb-3">
+                        <button id="back-to-list-btn" class="icon-btn p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <h1 id="customer-name-header" class="text-lg font-bold flex-1 text-center">গ্রাহকের নাম</h1>
+                        <button id="customer-menu-btn" class="icon-btn p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2m0 7a1 1 0 110-2 1 1 0 010 2m0 7a1 1 0 110-2 1 1 0 010 2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <div class="text-xs text-gray-600">ফোন</div>
+                            <div id="customer-phone-header" class="font-semibold">---</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-600">পাওনা</div>
+                            <div id="customer-due-header" class="font-semibold text-lg">৳০</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto">
+                    <div class="p-4">
+                        <h2 class="text-sm font-semibold text-gray-700 mb-3">লেনদেন ইতিহাস</h2>
+                        <div id="transaction-history" class="space-y-2 mb-4">
+                            <div class="text-sm text-gray-500 text-center py-8">কোনো লেনদেন নেই</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Transaction Button -->
+                <div class="p-4 border-t border-gray-200 bg-white">
+                    <button id="add-transaction-btn" class="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold text-sm">
+                        + নতুন হিসাব
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Customer Screen -->
+            <div id="add-customer-screen" class="screen flex-col w-full">
+                <div class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                    <div class="flex items-center gap-2">
+                        <button id="cancel-add-customer-btn" class="icon-btn p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-lg font-bold">নতুন গ্রাহক</h1>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">গ্রাহকের নাম *</label>
+                            <input id="new-customer-name" type="text" placeholder="নাম লিখুন" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">ফোন নম্বর</label>
+                            <input id="new-customer-phone" type="tel" placeholder="০১৭X XXXX XXXX" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">ঠিকানা</label>
+                            <textarea id="new-customer-address" placeholder="ঠিকানা লিখুন" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t border-gray-200 bg-white">
+                    <button id="save-customer-btn" class="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold text-sm">
+                        সংরক্ষণ করুন
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Transaction Screen -->
+            <div id="add-transaction-screen" class="screen flex-col w-full">
+                <div class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                    <div class="flex items-center gap-2">
+                        <button id="cancel-add-transaction-btn" class="icon-btn p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-lg font-bold">নতুন লেনদেন</h1>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">লেনদেনের ধরন *</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="type-sale-btn" class="transaction-type-btn px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold" data-type="sale">
+                                    ক্রেডিট বিক্রয়
+                                </button>
+                                <button id="type-payment-btn" class="transaction-type-btn px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold" data-type="payment">
+                                    অর্থ আদায়
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">পরিমাণ *</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-lg">৳</span>
+                                <input id="transaction-amount" type="number" placeholder="০" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm" min="0">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">তারিখ</label>
+                            <input id="transaction-date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">নোট</label>
+                            <textarea id="transaction-note" placeholder="নোট লিখুন (ঐচ্ছিক)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t border-gray-200 bg-white">
+                    <button id="save-transaction-btn" class="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold text-sm">
+                        সংরক্ষণ করুন
+                    </button>
+                </div>
+            </div>
+
+            <!-- Settings Screen -->
+            <div id="settings-screen" class="screen flex-col w-full">
+                <div class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                    <div class="flex items-center gap-2">
+                        <button id="back-to-dashboard-from-settings-btn" class="icon-btn p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-lg font-bold">সেটিংস</h1>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto">
+                    <div class="p-4 space-y-4">
+                        <!-- Shop Info -->
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <h2 class="font-semibold text-gray-900 mb-3">দোকানের তথ্য</h2>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-xs text-gray-600">দোকানের নাম</label>
+                                    <input id="shop-name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded mt-1 text-sm">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-600">ফোন</label>
+                                    <input id="shop-phone" type="tel" class="w-full px-3 py-2 border border-gray-300 rounded mt-1 text-sm">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-600">ঠিকানা</label>
+                                    <textarea id="shop-address" class="w-full px-3 py-2 border border-gray-300 rounded mt-1 text-sm resize-none" rows="2"></textarea>
+                                </div>
+                                <button id="save-shop-info-btn" class="w-full bg-gray-900 text-white py-2 rounded text-sm font-semibold">
+                                    সংরক্ষণ করুন
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Data Management -->
+                        <div class="space-y-2">
+                            <h2 class="font-semibold text-gray-900 px-1">ডাটা</h2>
+                            <button id="export-data-btn" class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+                                📥 ডাটা এক্সপোর্ট করুন
+                            </button>
+                            <button id="import-data-btn" class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+                                📤 ডাটা আমদানি করুন
+                            </button>
+                            <input id="import-file-input" type="file" accept=".json" style="display: none;">
+                        </div>
+
+                        <!-- Danger Zone -->
+                        <div class="border border-red-200 bg-red-50 rounded-lg p-4">
+                            <h2 class="font-semibold text-red-900 mb-3">বিপদজনক অঞ্চল</h2>
+                            <button id="clear-all-data-btn" class="w-full bg-red-600 text-white py-2 rounded text-sm font-semibold hover:bg-red-700">
+                                সমস্ত ডাটা মুছুন
+                            </button>
+                        </div>
+
+                        <!-- About -->
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 text-sm text-gray-600">
+                            <h2 class="font-semibold text-gray-900 mb-2">অ্যাপ সম্পর্কে</h2>
+                            <p class="mb-1"><strong>বাকি খাতা</strong> v1.0</p>
+                            <p>একটি সুন্দর ডিজিটাল ক্রেডিট লেজার</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Generation Screen -->
+            <div id="report-screen" class="screen flex-col w-full">
+                <div class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                    <div class="flex items-center gap-2">
+                        <button id="back-to-dashboard-from-report-btn" class="icon-btn p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-lg font-bold">প্রতিবেদন</h1>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div id="report-content" class="space-y-4">
+                        <div class="text-sm text-gray-500 text-center py-8">কোনো গ্রাহক নেই</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav bg-white border-t border-gray-200 grid grid-cols-4">
+            <button id="nav-dashboard" class="nav-btn py-3 px-2 text-center text-xs font-medium text-gray-900 border-b-2 border-gray-900">
+                <svg class="w-5 h-5 mx-auto mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4-2h2v20h-2zm4 4h2v16h-2z"></path></svg>
+                ড্যাশবোর্ড
+            </button>
+            <button id="nav-customers" class="nav-btn py-3 px-2 text-center text-xs font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700">
+                <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 12H9m6 0a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
+                গ্রাহক
+            </button>
+            <button id="nav-report" class="nav-btn py-3 px-2 text-center text-xs font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700">
+                <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                প্রতিবেদন
+            </button>
+            <button id="nav-settings" class="nav-btn py-3 px-2 text-center text-xs font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700">
+                <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                সেটিংস
+            </button>
+        </div>
+    </div>
+
+    <!-- Customer Menu Modal -->
+    <div id="customer-menu-modal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+        <div class="w-full bg-white rounded-t-lg">
+            <div class="p-4 space-y-2">
+                <button id="call-customer-btn" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 rounded">
+                    📞 কল করুন
+                </button>
+                <button id="share-pdf-btn" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 rounded">
+                    📄 পিডিএফ শেয়ার করুন
+                </button>
+                <button id="delete-customer-btn" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded">
+                    🗑️ গ্রাহক মুছুন
+                </button>
+                <button id="close-menu-btn" class="w-full text-left px-4 py-3 text-sm font-semibold border-t hover:bg-gray-50 rounded">
+                    বন্ধ করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
